@@ -1,111 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Card,
-  Button,
-  Row,
-  Col
-} from 'react-bootstrap';
-
-import { getMe, deleteBook } from '../utils/API';
-import Auth from '../utils/auth';
+// Import required React hooks and components
+import React, { useEffect, useState } from 'react'
+import { Container, Card, Button } from 'react-bootstrap'
+import { useQuery, useMutation } from '@apollo/client'
+import { GET_ME } from '../graphql/queries'
+import { REMOVE_BOOK } from '../graphql/mutations'
+import Auth from '../utils/auth'
+import { TrashIcon } from '@heroicons/react/24/solid'
 import { removeBookId } from '../utils/localStorage';
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry"
 
-const SavedBooks = () => {
-  const [userData, setUserData] = useState({});
+// Define the SavedBooks component
+export default function SavedBooks() {
+    // Fetch the user data using the GET_ME query and handle loading state
+    const { loading, data } = useQuery(GET_ME)
+    // Initialize the deleteBookMutation using the REMOVE_BOOK mutation
+    const [deleteBookMutation] = useMutation(REMOVE_BOOK)
+    // Use local state to store the user data
+    const [userData, setUserData] = useState({})
 
-  // use this to determine if `useEffect()` hook needs to run again
-  const userDataLength = Object.keys(userData).length;
-
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-        if (!token) {
-          return false;
+    // Update the userData state whenever data changes
+    useEffect(() => {
+        if (data?.getMe) {
+            setUserData(data?.getMe)
         }
+    }, [data])
 
-        const response = await getMe(token);
-
-        if (!response.ok) {
-          throw new Error('something went wrong!');
-        }
-
-        const user = await response.json();
-        setUserData(user);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    getUserData();
-  }, [userDataLength]);
-
-  // create function that accepts the book's mongo _id value as param and deletes the book from the database
-  const handleDeleteBook = async (bookId) => {
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-    if (!token) {
-      return false;
+    // Function to handle deleting a book
+    const handleDeleteBook = (bookId) => {
+        deleteBookMutation({
+            variables: {
+                bookId
+            }
+        })
+        removeBookId(bookId);
     }
 
-    try {
-      const response = await deleteBook(bookId, token);
+    // Render the SavedBooks component
+    return (
+        <div>
+            <div className='text-light bg-dark py-5 mb-5'>
+                <Container>
+                    <h1>Viewing saved books!</h1>
+                </Container>
+            </div>
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
+            <Container>
+                <h3>
+                    {
+                        loading ? 'Loading Books...'
+                            : userData?.bookCount
+                                ? `Viewing ${data.getMe.bookCount} saved books:`
+                                : 'You have no saved books!'
+                    }</h3>
 
-      const updatedUser = await response.json();
-      setUserData(updatedUser);
-      // upon success, remove book's id from localStorage
-      removeBookId(bookId);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+                <ResponsiveMasonry columnsCountBreakPoints={{ 350: 1, 768: 2, 992: 4 }} className='mt-2'>
+                    <Masonry gutter={20}>
+                        {
+                            userData?.savedBooks?.map((book) => {
+                                return (
+                                    <div className="p-2">
+                                        <Card key={book.bookId} className='shadow-sm border'>
+                                            <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' />
+                                            <Card.Body>
+                                                <Card.Title>{book.title}</Card.Title>
+                                                <p className='italic-light'>Authors: {book.authors}</p>
+                                                <Card.Text>{book.description}</Card.Text>
+                                                {Auth.loggedIn() && (
+                                                    <Button onClick={() => handleDeleteBook(book.bookId)} variant='danger' size='sm' className='d-flex align-items-center gap-2'>
+                                                        <span>Delete this Book!</span>
+                                                        <TrashIcon width={24} />
+                                                    </Button>
+                                                )}
+                                            </Card.Body>
+                                        </Card>
+                                    </div>
+                                );
+                            })
+                        }
+                    </Masonry>
+                </ResponsiveMasonry>
+            </Container>
+        </div >
 
-  // if data isn't here yet, say so
-  if (!userDataLength) {
-    return <h2>LOADING...</h2>;
-  }
-
-  return (
-    <>
-      <div fluid className="text-light bg-dark p-5">
-        <Container>
-          <h1>Viewing saved books!</h1>
-        </Container>
-      </div>
-      <Container>
-        <h2 className='pt-5'>
-          {userData.savedBooks.length
-            ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
-            : 'You have no saved books!'}
-        </h2>
-        <Row>
-          {userData.savedBooks.map((book) => {
-            return (
-              <Col md="4">
-                <Card key={book.bookId} border='dark'>
-                  {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
-                  <Card.Body>
-                    <Card.Title>{book.title}</Card.Title>
-                    <p className='small'>Authors: {book.authors}</p>
-                    <Card.Text>{book.description}</Card.Text>
-                    <Button className='btn-block btn-danger' onClick={() => handleDeleteBook(book.bookId)}>
-                      Delete this Book!
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </Col>
-            );
-          })}
-        </Row>
-      </Container>
-    </>
-  );
-};
-
-export default SavedBooks;
+    );
+}
