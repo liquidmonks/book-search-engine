@@ -3,7 +3,6 @@ const { gql } = require("apollo-server");
 
 // Define the GraphQL schema using the gql template literal tag
 module.exports = gql`
-  // Define the Book type with its fields
   type Book {
     _id: ID,
     bookId: String,
@@ -14,7 +13,6 @@ module.exports = gql`
     link: String,
   }
 
-  // Define the User type with its fields
   type User {
     _id: ID,
     username: String,
@@ -24,18 +22,15 @@ module.exports = gql`
     savedBooks: [Book]
   }
 
-  // Define the Auth type with its fields
   type Auth {
     token: String,
     user: User
   }
 
-  // Define the Query type with the getMe query
   type Query {
     getMe: User
   }
 
-  // Define the Mutation type with login, addUser, saveBook, and removeBook mutations
   type Mutation {
     login(email: String!, password: String!): Auth!
     addUser(username: String!, email: String!, password: String!): Auth!

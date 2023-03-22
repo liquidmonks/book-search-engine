@@ -7,7 +7,7 @@ exports.authMiddleware = (resolver) => {
   return function (parent, args, context, info) {
     // Extract the token from the request headers and initialize the user object
     let token = context.req.headers.authorization;
-    let user = {};
+    let user = {}
 
     // If a token is present, verify it using the JWT_SECRET key and extract the user object from the decoded token
     if (token) {
@@ -31,4 +31,4 @@ exports.signToken = ({ username, email, _id }) => {
   const payload = { username, email, _id };
 
   return jwt.sign({ args: payload }, process.env.JWT_SECRET, { expiresIn: "24h" });
-};
+}

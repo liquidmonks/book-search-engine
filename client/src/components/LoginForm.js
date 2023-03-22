@@ -1,92 +1,90 @@
-// see SignupForm.js for comments
-import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
-
-import { loginUser } from '../utils/API';
+// Import required dependencies
+import React, { useEffect } from 'react';
+import { Button, Alert, FormGroup, FormLabel } from 'react-bootstrap';
 import Auth from '../utils/auth';
+import { LOGIN_USER } from '../graphql/mutations'
+import { useMutation } from '@apollo/client';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
-const LoginForm = () => {
-  const [userFormData, setUserFormData] = useState({ email: '', password: '' });
-  const [validated] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
+// Define the LoginForm component
+export default function LoginForm() {
+    // Use the LOGIN_USER mutation
+    const [loginMutation, { loading, error, data }] = useMutation(LOGIN_USER);
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setUserFormData({ ...userFormData, [name]: value });
-  };
-
-  const handleFormSubmit = async (event) => {
-    event.preventDefault();
-
-    // check if form has everything (as per react-bootstrap docs)
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
+    // Set the initial values for the form fields
+    const initialValues = {
+        email: '',
+        password: '',
     }
 
-    try {
-      const response = await loginUser(userFormData);
-
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      const { token, user } = await response.json();
-      console.log(user);
-      Auth.login(token);
-    } catch (err) {
-      console.error(err);
-      setShowAlert(true);
-    }
-
-    setUserFormData({
-      username: '',
-      email: '',
-      password: '',
+    // Define the form validation schema using Yup
+    const LoginSchema = Yup.object().shape({
+        email: Yup.string().email('Invalid email').required('Required Field'),
+        password: Yup.string().min(6, 'Password must contain at least 6 characters').max(50, 'Too Long!').required('Required Field'),
     });
-  };
 
-  return (
-    <>
-      <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
-          Something went wrong with your login credentials!
-        </Alert>
-        <Form.Group className='mb-3'>
-          <Form.Label htmlFor='email'>Email</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Your email'
-            name='email'
-            onChange={handleInputChange}
-            value={userFormData.email}
-            required
-          />
-          <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
-        </Form.Group>
+    // Function to handle form submission
+    const handleFormSubmit = (values) => {
+        loginMutation({
+            variables: values
+        })
+    };
 
-        <Form.Group className='mb-3'>
-          <Form.Label htmlFor='password'>Password</Form.Label>
-          <Form.Control
-            type='password'
-            placeholder='Your password'
-            name='password'
-            onChange={handleInputChange}
-            value={userFormData.password}
-            required
-          />
-          <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
-        </Form.Group>
-        <Button
-          disabled={!(userFormData.email && userFormData.password)}
-          type='submit'
-          variant='success'>
-          Submit
-        </Button>
-      </Form>
-    </>
-  );
+    // Use the useEffect hook to log in the user if the data contains a login token
+    useEffect(() => {
+        if (data?.login) {
+            Auth.login(data.login.token)
+        }
+    }, [data])
+
+    // Render the login form using Formik
+    return (
+        <Formik
+            initialValues={initialValues}
+            validationSchema={LoginSchema}
+            onSubmit={handleFormSubmit}
+        >
+            {
+                ({ errors, touched }) => (
+                    <Form>
+                        {
+                            error?.message && (
+                                <Alert variant='danger'>
+                                    {error?.message}
+                                </Alert>
+                            )
+                        }
+                        <FormGroup className='mb-3'>
+                            <FormLabel htmlFor='email'>Email</FormLabel>
+                            <Field
+                                type='text'
+                                placeholder='Your email'
+                                name='email'
+                                className={`form-control ${errors.email && touched.email && 'is-invalid'} `}
+                            />
+                            <ErrorMessage component='span' name='email' className='invalid-feedback' />
+                        </FormGroup>
+
+                        <FormGroup className='mb-3'>
+                            <FormLabel htmlFor='password'>Password</FormLabel>
+                            <Field
+                                type='password'
+                                placeholder='Your password'
+                                name='password'
+                                className={`form-control ${errors.password && touched.password && 'is-invalid'} `}
+                            />
+                            <ErrorMessage component='span' name='password' className='invalid-feedback' />
+                        </FormGroup>
+                        <Button
+                            type='submit'
+                            variant='dark'
+                        >
+                            {loading ? 'Loging...' : 'Login'}
+                        </Button>
+                    </Form>
+                )
+            }
+        </Formik>
+    );
 };
-
-export default LoginForm;

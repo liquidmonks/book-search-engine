@@ -1,24 +1,16 @@
 {
-  "name": "server",
+  "name": "book-search-engine",
   "version": "1.0.0",
-  "description": "",
+  "description": "The MERN Book Search Engine is a fully functioning search engine built with a RESTful API and originally developed using the MERN stack. The search engine uses the Google Books API and includes a React front end, MongoDB database, and Node.js/Express.js server and API. The app has been refactored as a GraphQL API using Apollo Server.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "concurrently \"cd ./server && npm run dev\" \"cd ./client && npm start\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "apollo-server": "^3.12.0",
-    "apollo-server-express": "^3.12.0",
-    "bcrypt": "^5.1.0",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.0.2",
-    "nodemon": "^2.0.21"
+    "concurrently": "^7.6.0"
   }
 }
