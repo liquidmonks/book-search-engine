@@ -15,7 +15,7 @@ import Auth from './utils/auth'
 // Define the App component
 export default function App() {
   return (
-    // Wrap the app with ApolloProvider to connect the Apollo Client to React
+    
     <ApolloProvider>
       {/* Render the Navbar component */}
       <Navbar />

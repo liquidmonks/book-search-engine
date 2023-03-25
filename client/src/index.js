@@ -18,9 +18,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   // Use React.StrictMode to enable additional checks and warnings during development
   <React.StrictMode>
-    // Wrap the App component with BrowserRouter to handle routing within the app
     <BrowserRouter>
-      // Render the main App component
       <App />
     </BrowserRouter>
   </React.StrictMode>
