@@ -19,12 +19,12 @@ export default function NavBar() {
         <Container>
           <Navbar.Brand as={Link} to="/">
             <span>
-              <span class="g-blue">G</span>
-              <span class="o-red">o</span>
-              <span class="o-yellow">o</span>
-              <span class="g-blue">g</span>
-              <span class="l-green">l</span>
-              <span class="o-red e-red">e</span>
+              <span className="g-blue">G</span>
+              <span className="o-red">o</span>
+              <span className="o-yellow">o</span>
+              <span className="g-blue">g</span>
+              <span className="l-green">l</span>
+              <span className="o-red e-red">e</span>
             </span>{" "}
             Books Search
           </Navbar.Brand>
