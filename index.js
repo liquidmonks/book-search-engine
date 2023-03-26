@@ -37,7 +37,7 @@ db.once("open", async () => {
     await server.start();
 
     // Apply the ApolloServer middleware to the express app
-    server.applyMiddleware({ app, path: "/graphql" });
+    server.applyMiddleware({ app, path: "/" });
 
     // Get the port number from the environment variable 'PORT', or default to 5000
     const PORT = process.env.PORT || 5001;
