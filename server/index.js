@@ -40,7 +40,7 @@ db.once("open", async () => {
     server.applyMiddleware({ app, path: "/graphql" });
 
     // Get the port number from the environment variable 'PORT', or default to 5000
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 5001;
     // Listen for incoming requests on the specified port
     await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
     // Log the server URL to the console
