@@ -7,6 +7,7 @@ const express = require("express");
 const http = require("http");
 const { typeDefs, resolvers } = require("./schemas");
 const db = require("./db");
+const path = require("path");
 
 // Create an express application and an http server instance
 const app = express();
@@ -24,6 +25,11 @@ const server = new ApolloServer({
   },
 });
 
+app.use(express.static("build"));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+
 // Listen for the 'open' event of the db connection and start the server once the connection is established
 db.once("open", async () => {
   try {
@@ -31,7 +37,7 @@ db.once("open", async () => {
     await server.start();
 
     // Apply the ApolloServer middleware to the express app
-    server.applyMiddleware({ app, path: "/" });
+    server.applyMiddleware({ app, path: "/graphql" });
 
     // Get the port number from the environment variable 'PORT', or default to 5000
     const PORT = process.env.PORT || 5000;
