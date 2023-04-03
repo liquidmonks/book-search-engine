@@ -33,6 +33,7 @@ Lastly, the application has been deployed on Heroku, a cloud platform that facil
 
 
 ## Application Demo Snippet
+![booksearch](https://user-images.githubusercontent.com/114820394/229547431-e0895da2-601c-46cf-aec4-ced6e708854e.gif)
 
 
 ## 🔗 Deployed Site Link
